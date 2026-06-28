@@ -19,7 +19,8 @@
       body.append(ids.message, String(data.message || ""));
       body.append(ids.travelDate, String(data.travel_date || ""));
       body.append(ids.travelers, String(data.num_travelers || ""));
-      body.append(ids.package, String(data.package || ""));
+      // Append package if configured in config (some pages include this extra field)
+      if (ids.package) body.append(ids.package, String(data.package || ""));
 
       // Add required Google Forms parameters
       body.append('fvv', '1');
@@ -204,6 +205,8 @@
         travel_date: fd.get("travel_date"),
         num_travelers: fd.get("num_travelers"),
         message: fd.get("message"),
+        // Capture package if the form includes it (packages page uses this)
+        package: fd.get("package"),
       };
 
       // Normalize values to strings and trim
@@ -214,6 +217,7 @@
         travel_date: rawData.travel_date ? String(rawData.travel_date).trim() : "",
         num_travelers: rawData.num_travelers ? String(rawData.num_travelers).trim() : "",
         message: rawData.message ? String(rawData.message).trim() : "",
+        package: rawData.package ? String(rawData.package).trim() : "",
       };
 
       // Merge extraData (ensure primitive strings). Allow caller to pass logical keys like 'package'.
