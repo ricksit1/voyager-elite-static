@@ -66,7 +66,7 @@
       // Handle multiple destinations
       if (data.destinations) {
         const destStr = Array.isArray(data.destinations) ? data.destinations.join(", ") : String(data.destinations);
-        body.append(ids.destinations, destStr);
+        if (ids.destinations) body.append(ids.destinations, destStr);
       }
       
       if (data.start_date) body.append(ids.startDate, String(data.start_date));
@@ -75,15 +75,23 @@
       // Handle transport modes (checkboxes)
       if (data.transport_mode) {
         const modesStr = Array.isArray(data.transport_mode) ? data.transport_mode.join(", ") : String(data.transport_mode);
-        body.append(ids.transportMode, modesStr);
+        if (ids.transportMode) body.append(ids.transportMode, modesStr);
       }
       
       if (data.budget) body.append(ids.budget, String(data.budget));
-      if (data.notes) body.append(ids.notes, String(data.notes));
+      // Only append notes if a valid entry id is configured
+      if (data.notes && ids.notes) body.append(ids.notes, String(data.notes));
 
       // Add required Google Forms parameters
       body.append('fvv', '1');
       body.append('partialResponse', '[null,null,"-1"]');
+
+      // Debug: log what will be sent (useful because fetch with no-cors is opaque)
+      try {
+        for (const [k, v] of body.entries()) {
+          console.debug('TravelPlan->', k, v);
+        }
+      } catch (e) { /* noop */ }
 
       try {
         await fetch(cfg.travelPlanAction, {
@@ -121,28 +129,35 @@
       if (data.source) body.append(ids.source, String(data.source));
       if (data.destination) body.append(ids.destination, String(data.destination));
       if (data.travelers) body.append(ids.travelers, String(data.travelers));
-      if (data.notes) body.append(ids.notes, String(data.notes));
+      if (data.notes && ids.notes) body.append(ids.notes, String(data.notes));
       
       // Date fields (year/month/day)
       if (data.date) {
         const dateObj = new Date(data.date);
         if (!isNaN(dateObj)) {
-          body.append(ids.date_year, String(dateObj.getFullYear()));
-          body.append(ids.date_month, String(dateObj.getMonth() + 1));
-          body.append(ids.date_day, String(dateObj.getDate()));
+          if (ids.date_year) body.append(ids.date_year, String(dateObj.getFullYear()));
+          if (ids.date_month) body.append(ids.date_month, String(dateObj.getMonth() + 1));
+          if (ids.date_day) body.append(ids.date_day, String(dateObj.getDate()));
         }
       }
       
-      if (data.mode) body.append(ids.mode, String(data.mode));
+      if (data.mode && ids.mode) body.append(ids.mode, String(data.mode));
       
       // Section 3: Summary
       if (data.total_travelers) body.append(ids.totalTravelers, String(data.total_travelers));
       if (data.budget_per_person) body.append(ids.budgetPerPerson, String(data.budget_per_person));
-      if (data.overall_notes) body.append(ids.overallNotes, String(data.overall_notes));
+      if (data.overall_notes && ids.overallNotes) body.append(ids.overallNotes, String(data.overall_notes));
 
       // Add required Google Forms parameters
       body.append('fvv', '1');
       body.append('partialResponse', '[null,null,"-1"]');
+
+      // Debug: log what will be sent (useful because fetch with no-cors is opaque)
+      try {
+        for (const [k, v] of body.entries()) {
+          console.debug('TransportBooking->', k, v);
+        }
+      } catch (e) { /* noop */ }
 
       try {
         await fetch(cfg.transportBookingAction, {
